@@ -1,0 +1,17 @@
+## archivo de conexion a la base de datos
+
+from sqlmodel import create_engine, SQLModel, Session
+
+sqlite_file_name = "mensajes.db"
+sqlite_url = f"sqlite:///{sqlite_file_name}"
+
+engine = create_engine(sqlite_url, echo=True)
+
+def create_db_and_tables():
+    """Crea la base de datos y las tablas a partir de los modelos de SQLModel."""
+    SQLModel.metadata.create_all(engine)
+
+def get_session():
+    """Generador de dependencias para la sesión de la base de datos."""
+    with Session(engine) as session:
+        yield session
