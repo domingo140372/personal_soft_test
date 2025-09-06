@@ -7,21 +7,20 @@ from datetime import timedelta, datetime, timezone
 from jose import JWTError, jwt
 from .database import create_db_and_tables, get_session
 from .models import User, Token
-from .schemas import UserCreate, UserUpdate, Login, MessageCreate, MessageResponse
+from .schemas import UserCreate, UserUpdate, Login, MessageResponse, MessageCreate
+from .services import get_message_service, MessageService
 from .crud import (
     create_user_db, 
     get_user_by_username, 
     update_user_db, 
     soft_delete_user_db,
     verify_password,
-    process_and_create_message_db, 
-    get_messages_by_session_id
 )
 from sqlmodel import Session
 
 # (Tus otras importaciones y código existente)
 # Secreto y algoritmo para los tokens JWT
-SECRET_KEY = ""
+SECRET_KEY = "IYIYIHKHH98HJHGH7H==KJJLKJL09"
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 120
 
@@ -136,42 +135,39 @@ async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]
     """Ruta para obtener el usuario actual (requiere autenticación)."""
     return current_user
 
+
 @app.post("/api/messages", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
 def create_message_endpoint(
     message: MessageCreate,
-    session: Annotated[Session, Depends(get_session)],
     current_user: Annotated[User, Depends(get_current_user)],
+    message_service: Annotated[MessageService, Depends(get_message_service)]
 ):
     """
     Crea un nuevo mensaje, lo procesa y devuelve una respuesta.
-    - **message**: Datos del mensaje a enviar (session_id, content, sender).
-    - Requiere autenticación (token JWT).
+    La lógica de negocio es manejada por el servicio.
     """
     try:
-        db_message = process_and_create_message_db(current_user.id, message, session)
+        db_message = message_service.process_and_create_message(current_user.id, message)
         return db_message
     except HTTPException as e:
-        # Reenvía las excepciones HTTP del CRUD
         raise e
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error al procesar el mensaje: {e}"
+            detail=f"Error interno del servidor al procesar el mensaje: {e}"
         )
 
 @app.get("/api/messages/{session_id}", response_model=List[MessageResponse])
 def get_messages_in_session(
     session_id: str,
-    session: Annotated[Session, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_user)],
+    message_service: Annotated[MessageService, Depends(get_message_service)],
     limit: Annotated[int, Query(le=100, description="Límite de mensajes a devolver")] = 100,
     offset: Annotated[int, Query(ge=0, description="Número de mensajes a omitir")] = 0,
     sender: Annotated[Optional[str], Query(description="Filtrar por remitente ('user' o 'system')")] = None,
-    current_user: Annotated[User, Depends(get_current_user)]
 ):
     """
     Recupera todos los mensajes de una sesión dada.
-    - **session_id**: El ID de la sesión.
-    - Opcionalmente, se puede filtrar por 'sender' y usar paginación.
     """
-    messages = get_messages_by_session_id(session_id, session, limit, offset, sender)
-    return messages
+    messages = message_service.get_messages(session_id, limit, offset, sender)
+    return messagess

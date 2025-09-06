@@ -3,8 +3,9 @@ from sqlmodel import Session, select, func
 from passlib.context import CryptContext
 from fastapi import HTTPException, status
 from .models import User, Message
-from .schemas import UserCreate, UserUpdate, MessageCreate, MessageResponse
+from .schemas import UserCreate, UserUpdate
 from typing import Optional
+from uuid import UUID, uuid4
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -67,36 +68,21 @@ def soft_delete_user_db(user_id: int, session: Session):
     session.refresh(db_user)
     return {"message": "Usuario desactivado lógicamente"}
 
-
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
-
-
-def process_and_create_message_db(user_id: UUID, message: MessageCreate, session: Session):
-    """
-    Pipeline de procesamiento de mensajes:
-    1. Valida y filtra el contenido.
-    2. Agrega metadatos.
-    3. Almacena en la base de datos.
-    """
-    
-    # 1. Validación y Filtrado de Contenido (simple)
-    inappropriate_words = ["marica", "godo", "feo", "gay", "negro"]
-    if any(word in message.content.lower() for word in inappropriate_words):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="El mensaje contiene contenido inapropiado."
-        )
-
-    # 2. Agregar Metadatos
-    word_count = len(message.content.split())
-    message_length = len(message.content)
-
-    # 3. Almacenar en la Base de Datos
+def create_db_message(
+    session: Session,
+    user_id: UUID,
+    session_id: str,
+    content: str,
+    sender: str,
+    message_length: int,
+    word_count: int
+):
+    """Guarda un nuevo mensaje directamente en la base de datos."""
     db_message = Message(
-        session_id=message.session_id,
+        session_id=session_id,
         user_id=user_id,
-        content=message.content,
-        sender=message.sender,
+        content=content,
+        sender=sender,
         message_length=message_length,
         word_count=word_count
     )
