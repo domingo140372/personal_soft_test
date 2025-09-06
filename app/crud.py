@@ -1,9 +1,10 @@
 ## archivo para crear las consultas a la BD
-
-from sqlmodel import Session, select
+from sqlmodel import Session, select, func
 from passlib.context import CryptContext
-from .models import User
-from .schemas import UserCreate, UserUpdate
+from fastapi import HTTPException, status
+from .models import User, Message
+from .schemas import UserCreate, UserUpdate, MessageCreate, MessageResponse
+from typing import Optional
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -65,3 +66,62 @@ def soft_delete_user_db(user_id: int, session: Session):
     session.commit()
     session.refresh(db_user)
     return {"message": "Usuario desactivado lógicamente"}
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+def process_and_create_message_db(user_id: UUID, message: MessageCreate, session: Session):
+    """
+    Pipeline de procesamiento de mensajes:
+    1. Valida y filtra el contenido.
+    2. Agrega metadatos.
+    3. Almacena en la base de datos.
+    """
+    
+    # 1. Validación y Filtrado de Contenido (simple)
+    inappropriate_words = ["marica", "godo", "feo", "gay", "negro"]
+    if any(word in message.content.lower() for word in inappropriate_words):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El mensaje contiene contenido inapropiado."
+        )
+
+    # 2. Agregar Metadatos
+    word_count = len(message.content.split())
+    message_length = len(message.content)
+
+    # 3. Almacenar en la Base de Datos
+    db_message = Message(
+        session_id=message.session_id,
+        user_id=user_id,
+        content=message.content,
+        sender=message.sender,
+        message_length=message_length,
+        word_count=word_count
+    )
+    
+    session.add(db_message)
+    session.commit()
+    session.refresh(db_message)
+    
+    return db_message
+
+def get_messages_by_session_id(
+    session_id: str, 
+    session: Session,
+    limit: int = 100,
+    offset: int = 0,
+    sender: Optional[str] = None
+):
+    """Recupera mensajes por session_id con paginación y filtro de remitente."""
+    statement = select(Message).where(Message.session_id == session_id)
+    
+    if sender:
+        statement = statement.where(func.lower(Message.sender) == sender.lower())
+    
+    statement = statement.offset(offset).limit(limit)
+    
+    messages = session.exec(statement).all()
+    
+    return messages

@@ -1,6 +1,8 @@
 ## archivo donde creamos los esquemas a usar  para interactuar con la BD
 from pydantic import BaseModel
+from uuid import UUID
 from typing import Optional
+from datetime import datetime
 
 class UserCreate(BaseModel):
     """Esquema para la creación de un nuevo usuario."""
@@ -8,7 +10,7 @@ class UserCreate(BaseModel):
     email: str
     password: str
     full_name: Optional[str] = None
-    created_at: str
+    created_at: datetime
 
 class UserUpdate(BaseModel):
     """Esquema para la actualización de un usuario."""
@@ -20,4 +22,23 @@ class Login(BaseModel):
     """Esquema para la solicitud de login."""
     username: str
     password: str
+
+""" Esquemas para el manejo de mensajes """
+class MessageCreate(BaseModel):
+    """Esquema para la creación de un nuevo mensaje desde el cliente."""
+    session_id: str
+    content: str
+    sender: str
+
+class MessageResponse(BaseModel):
+    """Esquema completo para la respuesta del mensaje."""
+    message_id: str
+    session_id: str
+    user_id: UUID
+    content: str
+    timestamp: datetime
+    sender: str
+    message_length: int
+    word_count: int
+
 

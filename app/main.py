@@ -1,22 +1,25 @@
 ## archivo  principal para arrancar la aplicacion
 
-from typing import List, Annotated
-from fastapi import FastAPI, Depends, HTTPException, status
+from typing import List, Annotated, Optional
+from fastapi import FastAPI, Depends, HTTPException, status, Query
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from datetime import timedelta, datetime, timezone
 from jose import JWTError, jwt
 from .database import create_db_and_tables, get_session
 from .models import User, Token
-from .schemas import UserCreate, UserUpdate, Login
+from .schemas import UserCreate, UserUpdate, Login, MessageCreate, MessageResponse
 from .crud import (
     create_user_db, 
     get_user_by_username, 
     update_user_db, 
     soft_delete_user_db,
-    verify_password
+    verify_password,
+    process_and_create_message_db, 
+    get_messages_by_session_id
 )
 from sqlmodel import Session
 
+# (Tus otras importaciones y código existente)
 # Secreto y algoritmo para los tokens JWT
 SECRET_KEY = ""
 ALGORITHM = "HS256"
@@ -132,3 +135,26 @@ def delete_user(
 async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
     """Ruta para obtener el usuario actual (requiere autenticación)."""
     return current_user
+
+@app.post("/api/messages", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
+def create_message_endpoint(
+    message: MessageCreate,
+    session: Annotated[Session, Depends(get_session)],
+    current_user: Annotated[User, Depends(get_current_user)],
+):
+    """
+    Crea un nuevo mensaje, lo procesa y devuelve una respuesta.
+    - **message**: Datos del mensaje a enviar (session_id, content, sender).
+    - Requiere autenticación (token JWT).
+    """
+    try:
+        db_message = process_and_create_message_db(current_user.id, message, session)
+        return db_message
+    except HTTPException as e:
+        # Reenvía las excepciones HTTP del CRUD
+        raise e
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al procesar el mensaje: {e}"
+        )
