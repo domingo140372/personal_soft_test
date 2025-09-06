@@ -29,6 +29,11 @@ def get_user_by_username(username: str, session: Session):
     statement = select(User).where(User.username == username, User.is_active == True)
     return session.exec(statement).first()
 
+def get_user_by_email(email: str, session: Session):
+    """Obtiene un usuario por su nombre de usuario."""
+    statement = select(User).where(User.email == email, User.is_active == True)
+    return session.exec(statement).first()
+
 def get_all_users(session: Session):
     """Obtiene todos los usuarios activos."""
     statement = select(User).where(User.is_active == True)

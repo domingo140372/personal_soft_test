@@ -18,14 +18,18 @@ from .crud import (
 from sqlmodel import Session
 
 # Secreto y algoritmo para los tokens JWT
-SECRET_KEY = "tu_super_secreto_seguro_e_impresionante"
+SECRET_KEY = ""
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 120
 
 # Dependencia para el token OAuth2
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-app = FastAPI()
+app = FastAPI(
+        title="Api_MENSAJES",  
+        description="API para la gestión de mensajes", 
+        version="1.1.0", 
+    )
 
 def create_access_token(data: dict, expires_delta: timedelta):
     """Crea un token de acceso JWT con tiempo de expiración."""
