@@ -20,7 +20,7 @@ def verify_password(plain_password: str, hashed_password: str):
 def create_user_db(user: UserCreate, session: Session):
     """Crea un nuevo usuario en la base de datos."""
     hashed_password = get_password_hash(user.password)
-    db_user = User(username=user.username, password_hash=hashed_password, full_name=user.full_name)
+    db_user = User(username=user.username, email=user.email, password_hash=hashed_password, full_name=user.full_name)
     session.add(db_user)
     session.commit()
     session.refresh(db_user)
