@@ -158,3 +158,20 @@ def create_message_endpoint(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error al procesar el mensaje: {e}"
         )
+
+@app.get("/api/messages/{session_id}", response_model=List[MessageResponse])
+def get_messages_in_session(
+    session_id: str,
+    session: Annotated[Session, Depends(get_session)],
+    limit: Annotated[int, Query(le=100, description="Límite de mensajes a devolver")] = 100,
+    offset: Annotated[int, Query(ge=0, description="Número de mensajes a omitir")] = 0,
+    sender: Annotated[Optional[str], Query(description="Filtrar por remitente ('user' o 'system')")] = None,
+    current_user: Annotated[User, Depends(get_current_user)]
+):
+    """
+    Recupera todos los mensajes de una sesión dada.
+    - **session_id**: El ID de la sesión.
+    - Opcionalmente, se puede filtrar por 'sender' y usar paginación.
+    """
+    messages = get_messages_by_session_id(session_id, session, limit, offset, sender)
+    return messages
