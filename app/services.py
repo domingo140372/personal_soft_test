@@ -85,7 +85,15 @@ class MessageService:
             )
 
         # 1.3 Filtrado de contenido inapropiado
-        
+        content_lower = message.content.lower()
+        for category, words in INAPPROPRIATE_WORDS.items():
+            if any(bad in content_lower for bad in words):
+                raise ServiceError(
+                    code="INAPPROPRIATE_CONTENT",
+                    message="Contenido inapropiado detectado",
+                    details=f"El contenido incluye palabras no permitidas de la categoría '{category}'",
+                    http_status=status.HTTP_400_BAD_REQUEST,
+                )
         # 2) Metadatos
         word_count = len(message.content.split())
         message_length = len(message.content)
