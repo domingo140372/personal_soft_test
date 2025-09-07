@@ -23,6 +23,18 @@ class Login(BaseModel):
     username: str
     password: str
 
+class UserRead(BaseModel):
+    id: UUID
+    username: str
+    email: str
+    full_name: str | None = None
+    is_active: bool
+    create_at: datetime
+
+    class Config:
+        from_attributes = True  
+
+
 """ Esquemas para el manejo de mensajes """
 class MessageCreate(BaseModel):
     """Esquema para la creación de un nuevo mensaje desde el cliente."""

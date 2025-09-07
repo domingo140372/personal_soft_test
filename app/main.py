@@ -7,14 +7,15 @@ from datetime import timedelta, datetime, timezone
 from jose import JWTError, jwt
 from .database import create_db_and_tables, get_session
 from .models import User, Token
-from .schemas import UserCreate, UserUpdate, Login, MessageResponse, MessageCreate
+from .schemas import UserCreate, UserUpdate, UserRead, Login, MessageResponse, MessageCreate
 from .services import get_message_service, MessageService
 from .crud import (
     create_user_db, 
     get_user_by_username, 
     update_user_db, 
     soft_delete_user_db,
-    verify_password,
+    verify_password, 
+    get_all_users,
 )
 from sqlmodel import Session
 
@@ -41,6 +42,7 @@ def create_access_token(data: dict, expires_delta: timedelta):
     encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
     return encoded_jwt
 
+
 async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], session: Annotated[Session, Depends(get_session)]):
     """Dependencia para obtener el usuario actual a partir del token."""
     credentials_exception = HTTPException(
@@ -59,6 +61,11 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], sessio
     if user is None:
         raise credentials_exception
     return user
+
+async def get_all_users_list(session: Annotated[Session, Depends(get_session)]):
+    users = get_all_users(session=session)
+    return users
+
 
 @app.on_event("startup")
 def on_startup():
@@ -134,6 +141,11 @@ def delete_user(
 async def read_users_me(current_user: Annotated[User, Depends(get_current_user)]):
     """Ruta para obtener el usuario actual (requiere autenticación)."""
     return current_user
+
+@app.get("/users/all", response_model=List[UserRead])
+async def read_users_all(users: Annotated[User, Depends(get_all_users_list)]):
+    """Ruta para obtener listado de usuarios."""
+    return users
 
 
 @app.post("/api/messages", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
