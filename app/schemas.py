@@ -42,6 +42,12 @@ class MessageCreate(BaseModel):
     content: str
     sender: str
 
+class MessageMetaData(BaseModel):
+    """ Metadata del los mensajes """
+    word_count: int
+    character_count: int
+    created_at: datetime
+
 class MessageResponse(BaseModel):
     """Esquema completo para la respuesta del mensaje."""
     message_id: str
@@ -50,7 +56,5 @@ class MessageResponse(BaseModel):
     content: str
     created_at: datetime
     sender: str
-    message_length: int
-    word_count: int
-
+    metadata: MessageMetaData
 
