@@ -115,22 +115,17 @@ Estas librerías permiten ejecutar pruebas, usar mocks para aislar lógica de ne
 
 Crear el archivo
 pytest.ini:
-´´´
-	# pytest.ini
+	´´´
+		# pytest.ini
 
-	[pytest]
-	pythonpath = .
-´´´
+		[pytest]
+		pythonpath = .
+	´´´
 Esto asegura que pytest acceda al codigo desde el directorio raiz
 
 Ejecuta pytest desde la raíz del proyecto:
 
-pytest -v
+	(venv)@maquina:~/personal_soft_test$ pytest -v
 -v muestra más detalle de cada prueba ejecutada.
-
-Si quieres ver la cobertura de código, instala también pytest-cov:
-
-pip install pytest-cov
-pytest --cov=app --cov-report=term-missing
 
 
