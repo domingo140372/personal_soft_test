@@ -1,9 +1,11 @@
 ## archivo de conexion a la base de datos
-
+import os 
+from dotenv import load_dotenv
 from sqlmodel import create_engine, SQLModel, Session
 
-sqlite_file_name = "mensajes.db"
-sqlite_url = f"sqlite:///{sqlite_file_name}"
+load_dotenv()
+sqlite_url = os.getenv(DATABASE_URL)
+#####f"sqlite:///{sqlite_file_name}"
 
 engine = create_engine(sqlite_url, echo=True)
 
