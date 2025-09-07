@@ -170,4 +170,4 @@ def get_messages_in_session(
     Recupera todos los mensajes de una sesión dada.
     """
     messages = message_service.get_messages(session_id, limit, offset, sender)
-    return messagess
+    return messages

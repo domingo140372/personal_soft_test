@@ -21,7 +21,7 @@ class MessageService:
         """
         
         # 1. Validación y Filtrado de Contenido (simple)
-        inappropriate_words = ["mala_palabra", "ofensa", "palabra_prohibida"]
+        inappropriate_words = ["negro", "gordo", "feo", "maldito"]
         if any(word in message.content.lower() for word in inappropriate_words):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,

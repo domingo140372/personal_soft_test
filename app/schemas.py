@@ -36,7 +36,7 @@ class MessageResponse(BaseModel):
     session_id: str
     user_id: UUID
     content: str
-    timestamp: datetime
+    created_at: datetime
     sender: str
     message_length: int
     word_count: int
