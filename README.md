@@ -71,6 +71,7 @@ docker-compose.yml # Servicios FastAPI + Redis
 requirements.txt # Dependencias
 
 local_env.txt # Variables de entorno (ejemplo)
+
 ---
 
 ## ⚙️ Configuración
@@ -105,27 +106,27 @@ RATE_LIMIT_WINDOW=60
 	docker-compose up --build
 ```
 
-Esto ejecutará:
+## Esto ejecutará:
 
 	FastAPI en http://localhost:8000
 
 	Redis en localhost:6379
 
-🧪 Pruebas
+## 🧪 Pruebas
 
-Ejecutar pruebas unitarias con:
+# Ejecutar pruebas unitarias con:
 ```
 	pytest -v
 ```
 Las pruebas incluyen:
 
-Creación y autenticación de usuarios.
+	Creación y autenticación de usuarios.
 
-Validación de tokens JWT.
+	Validación de tokens JWT.
 
-Lógica de mensajes.
+	Lógica de mensajes.
 
-Verificación de rate limiting con Redis.
+	Verificación de rate limiting con Redis.
 
 📚 Documentación interactiva
 
