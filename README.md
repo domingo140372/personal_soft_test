@@ -39,22 +39,38 @@ Incluye autenticación JWT, limitación de tasa con Redis, y pruebas automatizad
 ## 📂 Estructura del proyecto
 
  app/
+ 
 │── main.py # Punto de entrada FastAPI
+
 │── config.py # Configuración centralizada (usa .env)
+
 │── database.py # Conexión y creación de tablas
+
 │── models.py # Modelos SQLModel
+
 │── schemas.py # Esquemas Pydantic
+
 │── crud.py # Operaciones de base de datos
+
 │── services.py # Lógica de negocio (mensajes)
+
 │── middlewares/
+
 │ └── rate_limit.py # Middleware de Rate Limiting con Redis
+
 tests/
+
 │── test_users.py # Pruebas de usuarios
+
 │── test_auth.py # Pruebas de autenticación
+
 │── test_messages.py # Pruebas de mensajes
+
 docker-compose.yml # Servicios FastAPI + Redis
+
 requirements.txt # Dependencias
-.env.example # Variables de entorno (ejemplo)
+
+local_env.txt # Variables de entorno (ejemplo)
 ---
 
 ## ⚙️ Configuración
