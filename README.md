@@ -129,3 +129,10 @@ Ejecuta pytest desde la raíz del proyecto:
 -v muestra más detalle de cada prueba ejecutada.
 
 
+⚠️ Nota: Antes de ejecutar las pruebas, asegúrate de que:
+
+Estás en el entorno virtual correcto (venv o similar).
+
+Redis esté corriendo en local o con Docker (requierido).
+
+La base de datos de pruebas esté configurada 

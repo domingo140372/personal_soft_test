@@ -4,10 +4,9 @@ from dotenv import load_dotenv
 from sqlmodel import create_engine, SQLModel, Session
 
 load_dotenv()
-sqlite_url = os.getenv(DATABASE_URL)
-#####f"sqlite:///{sqlite_file_name}"
-
-engine = create_engine(sqlite_url, echo=True)
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./database.db")
+engine = create_engine(DATABASE_URL, connect_args={"check_same_thread": False})
+#engine = create_engine(sqlite_url, echo=True)
 
 def create_db_and_tables():
     """Crea la base de datos y las tablas a partir de los modelos de SQLModel."""

@@ -5,7 +5,7 @@ from fastapi import Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 import redis.asyncio as redis
-import jwt
+from jose import jwt
 from app.config import settings
 
 
