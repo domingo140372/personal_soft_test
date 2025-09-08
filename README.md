@@ -118,28 +118,28 @@ RATE_LIMIT_WINDOW=60
 ```
 	pytest -v
 ```
-Las pruebas incluyen:
+- **Las pruebas incluyen:**
 
-	Creación y autenticación de usuarios.
+	- Creación y autenticación de usuarios.
 
-	Validación de tokens JWT.
+	- Validación de tokens JWT.
 
-	Lógica de mensajes.
+	- Lógica de mensajes.
 
-	Verificación de rate limiting con Redis.
+	- Verificación de rate limiting con Redis.
 
-📚 Documentación interactiva
+📚 - **Documentación interactiva**
 
-Una vez levantado el servidor:
+	- Una vez levantado el servidor:
 
-Swagger UI
+		- Swagger UI
 
-ReDoc
+		- ReDoc
 
-📌 Próximos pasos
+📌 - **Próximos pasos**
 
-Integrar Socket.IO para notificaciones en tiempo real.
+	- Integrar Socket.IO para notificaciones en tiempo real.
 
-Añadir soporte para PostgreSQL en lugar de SQLite.
+	- Añadir soporte para PostgreSQL en lugar de SQLite.
 
-Despliegue automatizado con GitHub Actions + IaC (CloudFormation/Terraform).
+	- Despliegue automatizado con GitHub Actions + IaC (CloudFormation/Terraform).
