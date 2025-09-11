@@ -27,3 +27,6 @@ class MessageResponse(BaseModel):
     sender: str
     metadata: MessageMetaData
 
+    class Config:
+        orm_mode = True
+
