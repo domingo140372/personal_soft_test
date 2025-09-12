@@ -3,6 +3,7 @@ from typing import Optional
 from sqlmodel import Field, SQLModel, Relationship
 from datetime import datetime, timezone
 from uuid import UUID, uuid4
+from app.users.models import User
 
 class Message(SQLModel, table=True):
     """Modelo para los mensajes con todos los metadatos."""
