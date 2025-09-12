@@ -1,4 +1,4 @@
-version: '3.8'
+version: '3.9'
 
 services:
   fastapi-app:
@@ -7,11 +7,15 @@ services:
       - "8000:8000"
     volumes:
       - .:/app
-      - ./data:/data   # Carpeta persistente solo para SQLite
+      #- ./data:/data   # Carpeta persistente solo para SQLite
     env_file:
       - .env
     depends_on:
       - redis
+      - db
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:postgres@db:5432/app_cars_inspector
+
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
   redis:
@@ -19,3 +23,29 @@ services:
     restart: unless-stopped
     ports:
       - "6379:6379"
+  
+  db:
+      image: postgres:15
+      container_name: postgres_db
+      restart: always
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: postgres
+        POSTGRES_DB: app_cars_inspector
+      ports:
+        - "9000:5432"   # expone PostgreSQL en el puerto 9000
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+
+  pgadmin:
+      image: dpage/pgadmin4
+      container_name: pgadmin
+      restart: always
+      environment:
+        PGADMIN_DEFAULT_EMAIL: admin@admin.com
+        PGADMIN_DEFAULT_PASSWORD: admin
+      ports:
+        - "8080:80"
+
+volumes:
+      postgres_data:

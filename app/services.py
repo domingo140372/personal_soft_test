@@ -8,8 +8,8 @@ from uuid import UUID
 from fastapi import Depends, status
 from sqlmodel import Session
 
-from .schemas import MessageCreate
-from .crud import create_db_message, get_messages_by_session_id
+from app.messages.schemas import MessageCreate
+from app.messages.crud import create_db_message, get_messages_by_session_id
 from .database import get_session
 
 

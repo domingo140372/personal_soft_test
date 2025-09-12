@@ -1,56 +1,67 @@
 # app/middleware/rate_limit.py
 import time
 from typing import Optional
-from fastapi import Request, status
 from starlette.middleware.base import BaseHTTPMiddleware
+from fastapi import Request, status
 from fastapi.responses import JSONResponse
-import redis.asyncio as redis
-from jose import jwt
-from app.config import settings
-
-
-def default_identifier(request: Request):
-    auth = request.headers.get("Authorization", "")
-    if auth.startswith("Bearer "):
-        token = auth.split(" ", 1)[1]
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.ALGORITHM])
-            sub = payload.get("sub")
-            if sub:
-                return f"user:{sub}"
-        except Exception:
-            pass
-    forward = request.headers.get("X-Forwarded-For")
-    if forward:
-        return forward.split(",")[0].strip()
-    return request.client.host
-
 
 class RedisRateLimitMiddleware(BaseHTTPMiddleware):
-    def __init__(self, app, redis_client: redis.Redis):
+    def __init__(
+        self,
+        app,
+        redis_client: Optional[object] = None,
+        rate_limit: int = 100,
+        time_window: int = 60,
+        key_prefix: str = "rl",
+        exempt_paths: Optional[list] = None,
+    ):
         super().__init__(app)
-        self.redis = redis_client
-        self.rate_limit = settings.RATE_LIMIT
-        self.time_window = settings.RATE_LIMIT_WINDOW
-        self.key_prefix = "rl"
-        self.exempt_paths = ["/docs", "/openapi.json", "/healthz"]
+        self._redis = redis_client
+        self.rate_limit = rate_limit
+        self.time_window = time_window
+        self.key_prefix = key_prefix
+        self.exempt_paths = exempt_paths or ["/docs", "/openapi.json", "/healthz", "/static"]
 
-    def _key(self, identifier: str):
+    @property
+    def redis(self):
+        # prefer self._redis, si no, intentar leer app.state.redis
+        if self._redis:
+            return self._redis
+        # getattr because self.app is set by BaseHTTPMiddleware
+        return getattr(self.app.state, "redis", None)
+
+    def _key(self, identifier: str) -> str:
         return f"{self.key_prefix}:{identifier}"
 
+    def _identifier(self, request: Request) -> str:
+        # si viene token, intenta usarlo (no decodificamos aquí); fallback IP
+        auth = request.headers.get("Authorization", "")
+        if auth.startswith("Bearer "):
+            token = auth.split(" ", 1)[1]
+            return f"user:{token}"
+        forwarded = request.headers.get("X-Forwarded-For")
+        if forwarded:
+            return forwarded.split(",")[0].strip()
+        return request.client.host
+
     async def dispatch(self, request: Request, call_next):
+        # excluir paths
         for p in self.exempt_paths:
             if request.url.path.startswith(p):
                 return await call_next(request)
 
-        ident = default_identifier(request)
+        redis = self.redis
+        if not redis:
+            # si no hay redis disponible, no limitamos (útil para tests/dev)
+            return await call_next(request)
+
+        ident = self._identifier(request)
         key = self._key(ident)
-
-        current = await self.redis.incr(key)
+        current = await redis.incr(key)
         if current == 1:
-            await self.redis.expire(key, self.time_window)
+            await redis.expire(key, self.time_window)
+        ttl = await redis.ttl(key)
 
-        ttl = await self.redis.ttl(key)
         if current > self.rate_limit:
             reset_ts = int(time.time()) + (ttl if ttl and ttl > 0 else self.time_window)
             body = {

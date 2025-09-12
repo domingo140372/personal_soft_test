@@ -9,3 +9,6 @@ bcrypt==3.2.2
 redis>=4.5.0
 python-dotenv
 python-socketio
+psycopg2-binary
+sqlalchemy
+alembic
