@@ -7,8 +7,10 @@ load_dotenv()
 
 class Settings:
     # Database
-    DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./mensajes.db")
-
+    DATABASE_URL = os.getenv(
+        "DATABASE_URL",
+        "postgresql+psycopg2://postgres:postgres@localhost:5432/app_cars_inspector"
+    )
     # Redis
     REDIS_HOST = os.getenv("REDIS_HOST", "redis")
     REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
